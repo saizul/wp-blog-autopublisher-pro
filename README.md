@@ -1,5 +1,7 @@
 # WP Blog Autopublisher Pro
 
+[![CI](https://github.com/saizul/wp-blog-autopublisher-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/saizul/wp-blog-autopublisher-pro/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white) ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
 Publish a folder of Markdown posts to WordPress through the REST API. Write in Markdown with YAML front matter; the tool converts to HTML, creates categories and tags, uploads a featured image (auto-generated if you do not provide one), schedules posts, and sets Yoast SEO fields.
 
 Built by [Saizul Amin](https://saizul.com). MIT licensed.
