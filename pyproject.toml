@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wp-blog-autopublisher-pro"
+version = "0.1.0"
+description = "Publish a folder of Markdown posts to WordPress via the REST API, with scheduling, SEO meta and auto featured images."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Saizul Amin", email = "hello@example.com" }]
+dependencies = [
+  "requests>=2.28",
+  "PyYAML>=6.0",
+  "Markdown>=3.4",
+  "Pillow>=9.0",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+wp-autopublish = "wp_autopublisher.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
