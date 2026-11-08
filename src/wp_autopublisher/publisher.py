@@ -43,6 +43,7 @@ class PlanItem:
             "    categories: %s" % (", ".join(self.post.categories) or "-"),
             "    tags:       %s" % (", ".join(self.post.tags) or "-"),
             "    image:      %s" % self.image,
+            "    image alt:  %s" % (self.post.featured_image_alt or "(post title)"),
             "    seo meta:   %s" % (", ".join(build_meta(self.post)) or "-"),
         ]
         return "\n".join(lines)
@@ -82,7 +83,7 @@ def publish_item(client: WPClient, item: PlanItem, workdir: Path,
         img_path = (post.path.parent / fi).resolve()
         if not img_path.is_file():
             raise FileNotFoundError("featured_image not found: %s" % img_path)
-    media_id = client.upload_media(img_path, post.title)
+    media_id = client.upload_media(img_path, post.title, post.featured_image_alt)
 
     payload: Dict[str, Any] = {
         "title": post.title,

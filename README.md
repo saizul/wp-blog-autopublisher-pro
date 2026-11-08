@@ -65,6 +65,7 @@ focus_keyword: "main keyword"
 publish_at: 2026-03-01 09:00     # optional; naive values use WP_TIMEZONE
 delay_hours: 24                  # optional; used if publish_at is absent
 featured_image: auto             # or a path relative to the post file; omitted = auto
+featured_image_alt: "Describe the image for screen readers"   # optional; default = post title
 ---
 ```
 
@@ -98,7 +99,7 @@ Search quality guidelines reward Experience, Expertise, Authoritativeness and Tr
 
 - Creates posts only; it does not update existing ones (they are skipped by slug).
 - Pages and custom post types are not handled.
-- Images are uploaded per post; alt text defaults to the title.
+- Images are uploaded per post; alt text comes from `featured_image_alt` and defaults to the post title.
 
 ## License
 

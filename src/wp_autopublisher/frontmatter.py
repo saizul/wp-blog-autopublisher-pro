@@ -31,6 +31,7 @@ class Post:
     publish_at: Optional[Union[str, datetime]] = None
     delay_hours: Optional[float] = None
     featured_image: str = ""  # "", "auto", or a path relative to the post file
+    featured_image_alt: str = ""  # alt text for the uploaded image; empty = use the title
 
 
 def slugify(text: str) -> str:
@@ -86,6 +87,7 @@ def parse_text(text: str, path: Path = Path("<memory>")) -> Post:
         publish_at=publish_at,
         delay_hours=delay,
         featured_image=str(meta.get("featured_image") or "").strip(),
+        featured_image_alt=str(meta.get("featured_image_alt") or "").strip(),
     )
 
 
