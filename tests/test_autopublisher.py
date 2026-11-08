@@ -123,3 +123,42 @@ def test_scheduled_payload_has_date_gmt(tmp_path):
     publish_item(c, item, tmp_path, log=lambda m: None)
     assert c.created[0]["status"] == "future"
     assert c.created[0]["date_gmt"] == (NOW + timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def test_featured_image_alt_is_parsed():
+    post = parse_text(DOC.replace("focus_keyword: kw", "featured_image_alt: A red bicycle  "))
+    assert post.featured_image_alt == "A red bicycle"
+    assert parse_text(DOC).featured_image_alt == ""
+
+
+def test_featured_image_alt_reaches_upload(tmp_path):
+    class AltClient(FakeClient):
+        def upload_media(self, path, title, alt_text=""):
+            self.alts = (title, alt_text)
+            return super().upload_media(path, title, alt_text)
+
+    post = parse_text(DOC.replace("focus_keyword: kw", "featured_image_alt: Alt words"))
+    post.path = tmp_path / "hello.md"
+    c = AltClient()
+    publish_item(c, make_plan([post], NOW)[0], tmp_path, log=lambda m: None)
+    assert c.alts == ("Hello World", "Alt words")
+
+
+def test_missing_alt_is_empty_so_client_falls_back_to_title(tmp_path):
+    class AltClient(FakeClient):
+        def upload_media(self, path, title, alt_text=""):
+            self.alts = (title, alt_text)
+            return super().upload_media(path, title, alt_text)
+
+    post = parse_text(DOC)
+    post.path = tmp_path / "hello.md"
+    c = AltClient()
+    publish_item(c, make_plan([post], NOW)[0], tmp_path, log=lambda m: None)
+    assert c.alts == ("Hello World", "")
+
+
+def test_dry_run_plan_shows_alt_text():
+    post = parse_text(DOC.replace("focus_keyword: kw", "featured_image_alt: Alt words"))
+    text = make_plan([post], NOW)[0].describe()
+    assert "image alt:  Alt words" in text
+    assert "image alt:  (post title)" in make_plan([parse_text(DOC)], NOW)[0].describe()
