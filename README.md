@@ -14,7 +14,8 @@ Built by [Saizul Amin](https://saizul.com). MIT licensed.
 - Media upload with title and alt text
 - Categories and tags: looked up by slug, created when missing
 - Scheduling: `publish_at` or `delay_hours` becomes `status=future` with `date_gmt`
-- Idempotent: a post whose slug already exists (any status) is skipped
+- Idempotent: a post whose slug already exists (any status) is skipped, or updated in place with `--update`
+- `--only SLUG` to publish or update a single post from a folder
 - Yoast SEO title, meta description and focus keyword through the `meta` field
 - `--dry-run` prints the full plan with zero network calls
 
@@ -46,7 +47,11 @@ wp-autopublish examples/posts --dry-run     # preview, no network
 wp-autopublish examples/posts               # publish
 wp-autopublish examples/posts --draft       # unscheduled posts become drafts
 wp-autopublish posts/ --timezone Asia/Dhaka # interpret naive publish_at in this zone
+wp-autopublish posts/ --update              # push edits to posts that already exist
+wp-autopublish posts/ --update --only my-post-slug   # just one post
 ```
+
+Every live run ends with a summary such as `1 created, 2 updated, 0 skipped, 0 failed`. Two files that resolve to the same slug are rejected before anything is sent.
 
 Exit codes: 0 success, 1 one or more posts failed (or no files), 2 configuration or front matter error.
 
@@ -69,6 +74,19 @@ featured_image_alt: "Describe the image for screen readers"   # optional; defaul
 ---
 ```
 
+### Updating existing posts
+
+By default a slug that already exists on the site is skipped. With `--update` the post found by slug is updated instead:
+
+| Field | On update |
+| --- | --- |
+| title, content, excerpt, categories, tags, Yoast meta | always replaced from the Markdown file |
+| featured image | replaced only when `featured_image` names a file, or when the post has no image yet; `auto` images are not regenerated (keeps the Media Library clean) |
+| status and date | changed only while the post is `draft`, `pending` or `future`; a published or private post keeps its status and publish date |
+| slug | never changed |
+
+Slugs that do not exist yet are created as usual, so `--update` is safe to run on the whole folder.
+
 Scheduling rules: `publish_at` wins over `delay_hours`. A time in the future sends `status=future` and `date_gmt` in UTC; a time in the past (or no schedule) publishes immediately (or creates a draft with `--draft`).
 
 ## Yoast SEO fields
@@ -81,7 +99,7 @@ The REST API only accepts post meta keys that were registered with `show_in_rest
 pytest
 ```
 
-Tests cover front matter parsing, schedule date math, dry-run (asserts no HTTP) and the publish flow against a fake client. No network is used.
+Tests cover front matter parsing, schedule date math, dry-run (asserts no HTTP), the publish and update flows against a fake client, and the REST client's lookup and update calls. No network is used.
 
 ## Writing tips for E-E-A-T
 
@@ -97,7 +115,7 @@ Search quality guidelines reward Experience, Expertise, Authoritativeness and Tr
 
 ## Limitations
 
-- Creates posts only; it does not update existing ones (they are skipped by slug).
+- Existing posts are matched by slug only; renaming a slug in front matter creates a new post.
 - Pages and custom post types are not handled.
 - Images are uploaded per post; alt text comes from `featured_image_alt` and defaults to the post title.
 

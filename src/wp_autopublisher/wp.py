@@ -28,12 +28,27 @@ class WPClient:
 
     # --- posts -----------------------------------------------------------
     def post_exists(self, slug: str) -> bool:
-        # status=any needs auth; includes drafts, scheduled and private posts
-        data = self._request("GET", "/posts", params={"slug": slug, "status": "any", "_fields": "id"})
-        return bool(data)
+        return self.find_post(slug) is not None
+
+    def find_post(self, slug: str) -> Optional[Dict[str, Any]]:
+        """Return ``{"id", "status", "featured_media", "link"}`` for ``slug`` or None.
+
+        status=any needs auth; includes drafts, scheduled and private posts.
+        """
+        data = self._request("GET", "/posts", params={
+            "slug": slug, "status": "any", "_fields": "id,status,featured_media,link",
+        })
+        if not data:
+            return None
+        if not isinstance(data, list) or not isinstance(data[0], dict) or "id" not in data[0]:
+            raise WPError("unexpected response when looking up slug %r" % slug)
+        return data[0]
 
     def create_post(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         return self._request("POST", "/posts", json=payload)
+
+    def update_post(self, post_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/posts/%d" % int(post_id), json=payload)
 
     # --- terms -----------------------------------------------------------
     def ensure_term(self, taxonomy: str, name: str, slug: str) -> int:
